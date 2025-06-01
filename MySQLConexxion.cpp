@@ -1,0 +1,114 @@
+#include "MySQLConexion.h"
+#include "EloquentORM.h"
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+/**
+ * 
+
+ * @class Estudiante
+ * @brief Clase que maneja operaciones CRUD para la tabla ESTUDIANTES.
+ */
+class Estudiante {
+private:
+    EloquentORM orm; ///< Instancia del ORM para acceder a la tabla ESTUDIANTES
+
+public:
+    /**
+     * @brief Constructor que inicializa el ORM con la conexión y tabla ESTUDIANTES.
+     * @param db Referencia a la conexión de base de datos MySQL.
+     */
+    Estudiante(MySQLConexion &db)
+        : orm(db, "ESTUDIANTES", {"ID", "NOMBRE", "DIRECCION", "CORREO"}) {}
+
+    void crear() {
+        cin.ignore();
+        string id, nombre, direccion, correo;
+
+        cout << "Ingrese el ID del estudiante: ";
+        getline(cin, id);
+        cout << "Ingrese el nombre del estudiante: ";
+        getline(cin, nombre);
+        cout << "Ingrese la dirección del estudiante: ";
+        getline(cin, direccion);
+        cout << "Ingrese el correo del estudiante: ";
+        getline(cin, correo);
+
+        orm.set("ID", id);
+        orm.set("NOMBRE", nombre);
+        orm.set("DIRECCION", direccion);
+        orm.set("CORREO", correo);
+
+        if (orm.save()) {
+            cout << "Estudiante creado correctamente.\n";
+        } else {
+            cout << "Hubo un error al crear el estudiante.\n";
+        }
+    }
+
+    void leer() {
+        int id;
+        cout << "Ingrese el ID del estudiante a buscar: ";
+        cin >> id;
+
+        if (orm.find(id)) {
+            cout << "ID: " << orm.get("ID") << endl;
+            cout << "Nombre: " << orm.get("NOMBRE") << endl;
+            cout << "Dirección: " << orm.get("DIRECCION") << endl;
+            cout << "Correo: " << orm.get("CORREO") << endl;
+        } else {
+            cout << "Estudiante no encontrado.\n";
+        }
+    }
+
+    void actualizar() {
+        int id;
+        cout << "Ingrese el ID del estudiante a actualizar: ";
+        cin >> id;
+        cin.ignore();
+
+        if (orm.find(id)) {
+            string nombre, direccion, correo;
+
+            cout << "Nuevo nombre (actual: " << orm.get("NOMBRE") << "): ";
+            getline(cin, nombre);
+            cout << "Nueva dirección (actual: " << orm.get("DIRECCION") << "): ";
+            getline(cin, direccion);
+            cout << "Nuevo correo (actual: " << orm.get("CORREO") << "): ";
+            getline(cin, correo);
+
+            orm.set("ID", to_string(id));
+            if (!nombre.empty()) orm.set("NOMBRE", nombre);
+            if (!direccion.empty()) orm.set("DIRECCION", direccion);
+            if (!correo.empty()) orm.set("CORREO", correo);
+
+            if (orm.save()) {
+                cout << "Estudiante actualizado correctamente.\n";
+            } else {
+                cout << "Hubo un error al actualizar el estudiante.\n";
+            }
+        } else {
+            cout << "Estudiante no encontrado.\n";
+        }
+    }
+
+    void eliminar() {
+        int id;
+        cout << "Ingrese el ID del estudiante a eliminar: ";
+        cin >> id;
+
+        if (orm.find(id)) {
+            orm.set("id", to_string(id));
+            if (orm.remove()) {
+                cout << "Estudiante eliminado correctamente.\n";
+            } else {
+                cout << "Error al eliminar estudiante.\n";
+            }
+        } else {
+            cout << "Estudiante no encontrado.\n";
+        }
+    }
+};
